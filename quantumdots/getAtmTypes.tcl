@@ -7,7 +7,7 @@
 # Salvatore Cosseddu 2013-2015
 #
 # SYNOPSIS:
-#   ::utiltools::quantumdot::getAtmTypes <molID> <list atomnames> <list first_neighbour_distances> <frame (0)>\]
+#   ::utiltools::quantumdot::getAtmTypes <molID> <list atomnames> <list first_neighbour_distances> \[<frame (0)>\]
 #
 # OPTIONS
 # @param molID
@@ -43,7 +43,7 @@ first_neighbour_distances is user-provided.
 Salvatore Cosseddu 2013-2015
 
 SYNOPSIS:
-  ::utiltools::quantumdot::getAtmTypes <molID> <list atomnames> <list first_neighbour_distances> <frame (0)>\]
+  ::utiltools::quantumdot::getAtmTypes <molID> <list atomnames> <list first_neighbour_distances> \[<frame (0)>\]
 
 OPTIONS
 - molID
@@ -56,19 +56,19 @@ OPTIONS
 	       \[array get surfaceIDs \]
 	       \[array get bulkIDs \]
 USAGE
-set AtmTypList \[::utiltools::quantumdot::getAtmTypes top \{Cd Se\} {\4.35 4.35\}\]
+set AtmTypList \[::utiltools::quantumdot::getAtmTypes top \{Cd Se\} \{4.35 4.35\}\]
 array set CoordNumLists \[lindex $AtmTypList 0\]
 array set CoordNums     \[lindex $AtmTypList 1\]
 array set surfaceIDs    \[lindex $AtmTypList 2\]
 array set bulkIDs       \[lindex $AtmTypList 3\]
-"
+    "
 
 }
 
 
 proc ::utiltools::quantumdot::getAtmTypes {molID atomnames first_neighbour_distances {frame 0}} {
        
-     if {[llength $molID] == 0 ||
+    if {[llength $molID] == 0 ||
 	[llength $atomnames]  == 0 ||
 	[llength $first_neighbour_distances] == 0 } {
 	::utiltools::quantumdot::usage_getAtmTypes
@@ -77,7 +77,7 @@ proc ::utiltools::quantumdot::getAtmTypes {molID atomnames first_neighbour_dista
 	
     array set CoordNumLists {}
     array set CoordNums {}
-
+    
     array set surfaceIDs {}
     array set bulkIDs {}
     
@@ -85,8 +85,8 @@ proc ::utiltools::quantumdot::getAtmTypes {molID atomnames first_neighbour_dista
     foreach atm $atomnames d $first_neighbour_distances {
 	# compute number of nearest atoms of the same type
 	# ::utiltools::measure::NeighAtms molID sel1 sel2 r start end coordNum
-	set CoordNumLists($atm) [::utiltools::measure::NeighAtms $molID $atm $atm $d $frame $frame T]
-				
+	set CoordNumLists($atm) [::utiltools::measure::NeighAtms $molID "name $atm" "name $atm" $d $frame $frame T]
+
 	# sorting type  of atoms according to number of nearest atoms of the same type
 	set CoordNums($atm) [lsort -integer -unique [lindex $CoordNumLists($atm) 1]]
 
@@ -107,12 +107,8 @@ proc ::utiltools::quantumdot::getAtmTypes {molID atomnames first_neighbour_dista
 	}
     }
 
-    return [ list [array get CoordNumLists ]
-	     [array get CoordNums ]
-	     [array get surfaceIDs ]
-	     [array get bulkIDs ]
-	    ]
-
+    return [ list [array get CoordNumLists ] [array get CoordNums ] [array get surfaceIDs ] [array get bulkIDs ] ]
+    
 }
 
 
