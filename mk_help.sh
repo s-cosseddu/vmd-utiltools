@@ -4,7 +4,7 @@ rm help.md
 touch help.md
 
 #dirtoupdate=$( ls -d */)
-dirtoupdate="quantumdots measure"
+dirtoupdate="measure"
 
 for i in $dirtoupdate;
 do

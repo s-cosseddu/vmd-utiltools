@@ -103,11 +103,15 @@ Additional measure functions
 
 ### coordNum.tcl --
 
- Search neighbours of sel1 atoms in sel2 atoms 
- if required compute coordination number (coordNum T)
- or do not repeat pairs nopairs (useful for sums)
+ Set of tools to compute neighbor atoms and coordination atoms 
 
  Salvatore Cosseddu 2013-2015
+
+ FUNCTION:
+   NeighAtms -
+   Search neighbours of sel1 atoms in sel2 atoms  
+   if required compute coordination number (coordNum T)
+   or do not repeat pairs nopairs (useful for sums)
 
  SYNOPSIS:
    ::utiltools::measure::NeighAtms <molID> <sel1> <sel2> <r> <start> <end> \[<coordNum F>\] \[<nopairs F>\]
@@ -121,13 +125,42 @@ Additional measure functions
   * coordNum (optional, default=F, return cordinations numbers instead of index of neighbor atoms
   * nopairs (optional, default=F, do not count pairs twice)
 
- RETURN
-   if start != end (working with trajectory)
-       if coordNum==F -> \[list  (atomids) \[array(frame) (neigh\_atomids) \]\]
-       if coordNum==T -> \[list  (atomids) \[array(frame) (coordnum) \]\]
-   if start == end (working with single frame)
-       if coordNum==F -> \[list  (atomids) (neigh\_atomids) \]
-       if coordNum==T -> \[list  (atomids) (coordnum) \]
+RETURN
+  if start != end (working with trajectory)
+             if coordNum==F -> \[list  (atomids) \[array(frame) (neigh\\_atomids) \]\]
+             if coordNum==T -> \[list  (atomids) \[array(frame) (coordnum) \]\]
+         if start == end (working with single frame)
+             if coordNum==F -> \[list  (atomids) (neigh\\_atomids) \]
+             if coordNum==T -> \[list  (atomids) (coordnum) \]
+
+ FUNCTION:
+   AtmXcoordNum -
+   Sort atoms according to the number of neighbor atoms belonging to a given atom selection and within a range r.
+   Implementation is independent from ::utiltools::measure::NeighAtms and therefore faster if
+   more detailed information are not required.
+ 
+   For flexibility (array are not flexible in tcl),
+   output is \[list (coordnums1 coordnums2 ) \[list \{atomids\_list1\} \{atomids\_list1\} ...\]\]
+   which maps into the simple two dimensional array
+        coordnums1         coordnums2         ...
+   1  atomids\_list1,1   atomids\_list2,1       ...
+   2  atomids\_list1,2   atomids\_list2,2	 ...
+   3  atomids\_list1,3   atomids\_list2,3       ...
+   ...   ...                 ...              ...
+
+ SYNOPSIS:
+   ::utiltools::measure::AtmXcoordNum <molID> <sel1> <sel2> <r> <start> <end> 
+
+ OPTIONS
+  * molID	 
+  * sel1 : main selection from which neighbors/coordNums are computed
+  * sel2 : selection of neighbor atoms
+  * r : cutoff for searching neighbors
+  * start, end : first and last considered frames. If if equals a simplified output is returned, see RETURN below
+ 
+RETURN
+  \[list (coordnums1 coordnums2 ) [list {atomids\_list1} {atomids\_list1} ...] (see description)
+
 
 ### distance.tcl --
 
@@ -137,7 +170,7 @@ Additional measure functions
     utiltools::measure::distance <molID> sel1 sel2 \[frame (now)\] \[weight (null)\] 
  
  FUNCTION:
-    distance\\_traj -- compute distance between two selections over the trajectory
+    distance\_traj -- compute distance between two selections over the trajectory
  SYNOPSIS:
     utiltools distance\_traj <molID>  <selection1> <selection1> \[options...\] 
  OPTIONS
@@ -303,7 +336,7 @@ Additional procs to compute non-standard radial distribution functions
 
 
 ## quantumdots ##
-### coordNum.tcl --
+### getAtmTypes.tcl --
 
  Search atoms of the surface and on the bulk according to the
  first\_neighbour\_distances, the distance of the first neighbours of the same type.

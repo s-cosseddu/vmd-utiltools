@@ -1,62 +1,70 @@
 
 
 
-## quantumdots ##
-### coordNum.tcl --
-
- Search atoms of the surface and on the bulk according to the
- first_neighbour_distances, the distance of the first neighbours of the same type.
- first_neighbour_distances is user-provided.
-
- Salvatore Cosseddu 2013-2015
-
- SYNOPSIS:
-   ::utiltools::quantumdot::getAtmTypes <molID> <list atomnames> <list first_neighbour_distances> <frame (0)>\]
-
- OPTIONS
-  * molID
-  * atomnames
-  * first_neighbour_distances
-  * frame (optional, default=0)
-  * return ::  list \[array get CoordNumLists \]
-	       \[array get CoordNums \]
-	       \[array get surfaceIDs \]
-	       \[array get bulkIDs \]
- USAGE
- set AtmTypList \[::utiltools::quantumdot::getAtmTypes top \{Cd Se\} \{4.35 4.35\}\]
- array set CoordNumLists \[lindex $AtmTypList 0\]
- array set CoordNums     \[lindex $AtmTypList 1\]
- array set surfaceIDs	  \[lindex $AtmTypList 2\]
- array set bulkIDs       \[lindex $AtmTypList 3\]
- -- 
-
-
-
 ## measure ##
 ### coordNum.tcl --
 
- Search neighbours of sel1 atoms in sel2 atoms 
- if required compute coordination number (coordNum T)
- or do not repeat pairs nopairs (useful for sums)
+  Set of tools to compute neighbor atoms and coordination atoms 
 
  Salvatore Cosseddu 2013-2015
+
+ FUNCTION:
+   NeighAtms -
+   Search neighbours of sel1 atoms in sel2 atoms  
+   if required compute coordination number (coordNum T)
+   or do not repeat pairs nopairs (useful for sums)
 
  SYNOPSIS:
    ::utiltools::measure::NeighAtms <molID> <sel1> <sel2> <r> <start> <end> \[<coordNum F>\] \[<nopairs F>\]
 
  OPTIONS
   * molID	 
-  * selection
-  * sel1
-  * sel2
-  * r
-  * start
-  * end
+  * sel1 : main selection from which neighbors/coordNums are computed
+  * sel2 : selection of neighbor atoms
+  * r : cutoff of neighbors
+  * start, end : first and last considered frames. If if equals a simplified output is returned, see RETURN below
   * coordNum (optional, default=F, return cordinations numbers instead of index of neighbor atoms
   * nopairs (optional, default=F, do not count pairs twice)
-  * return ::  \[array(frame) (atomids) (neigh\_atomids) \]
-          or if coordNum==T \[array(frame) (atomids) (coordnum) \] 
+ 
 
+RETURN
+  if start != end (working with trajectory)
+             if coordNum==F -> \[list  (atomids) \[array(frame) (neigh\_atomids) \]\]
+             if coordNum==T -> \[list  (atomids) \[array(frame) (coordnum) \]\]
+         if start == end (working with single frame)
+             if coordNum==F -> \[list  (atomids) (neigh\_atomids) \]
+             if coordNum==T -> \[list  (atomids) (coordnum) \]
+
+ FUNCTION:
+   AtmXcoordNum -
+   Sort atoms according to the number of neighbor atoms belonging to a given atom selection and within a range r.
+   Implementation is independent from ::utiltools::measure::NeighAtms and therefore faster if
+   more detailed information are not required.
+ 
+   For flexibility (array are not flexible in tcl),
+   output is \[list (coordnums1 coordnums2 ) \[list \{atomids_list1\} \{atomids_list1\} ...\]\]
+   which maps into the simple two dimensional array
+        coordnums1         coordnums2         ...
+   1  atomids_list1,1   atomids_list2,1       ...
+   2  atomids_list1,2   atomids_list2,2	 ...
+   3  atomids_list1,3   atomids_list2,3       ...
+   ...   ...                 ...              ...
+
+ SYNOPSIS:
+   ::utiltools::measure::AtmXcoordNum <molID> <sel1> <sel2> <r> <start> <end> 
+
+ OPTIONS
+  * molID	 
+  * sel1 : main selection from which neighbors/coordNums are computed
+  * sel2 : selection of neighbor atoms
+  * r : cutoff for searching neighbors
+  * start, end : first and last considered frames. If if equals a simplified output is returned, see RETURN below
+ 
+
+RETURN
+  \[list (coordnums1 coordnums2 ) [list {atomids_list1} {atomids_list1} ...] (see description)
+ Compute id of neighbor atms of coord atoms at certain frame,
+ defined to be called by ::utiltools::measure::NeighAtms and not directly 
 ### distance.tcl --
 
   procs to measure distances 

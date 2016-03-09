@@ -1,4 +1,4 @@
-## \file coordNum.tcl --
+## \file getAtmTypes.tcl --
 #
 # Search atoms of the surface and on the bulk according to the
 # first_neighbour_distances, the distance of the first neighbours of the same type.

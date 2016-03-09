@@ -1,10 +1,14 @@
 ## \file coordNum.tcl --
 #
-# Search neighbours of sel1 atoms in sel2 atoms 
-# if required compute coordination number (coordNum T)
-# or do not repeat pairs nopairs (useful for sums)
+#  Set of tools to compute neighbor atoms and coordination atoms 
 #
 # Salvatore Cosseddu 2013-2015
+#
+# FUNCTION:
+#   NeighAtms -
+#   Search neighbours of sel1 atoms in sel2 atoms  
+#   if required compute coordination number (coordNum T)
+#   or do not repeat pairs nopairs (useful for sums)
 #
 # SYNOPSIS:
 #   ::utiltools::measure::NeighAtms <molID> <sel1> <sel2> <r> <start> <end> \[<coordNum F>\] \[<nopairs F>\]
@@ -24,6 +28,34 @@
 #             if coordNum==F -> \[list  (atomids) (neigh\_atomids) \]
 #             if coordNum==T -> \[list  (atomids) (coordnum) \]
 #
+
+# FUNCTION:
+#   AtmXcoordNum -
+#   Sort atoms according to the number of neighbor atoms belonging to a given atom selection and within a range r.
+#   Implementation is independent from ::utiltools::measure::NeighAtms and therefore faster if
+#   more detailed information are not required.
+# 
+#   For flexibility (array are not flexible in tcl),
+#   output is \[list (coordnums1 coordnums2 ) \[list \{atomids_list1\} \{atomids_list1\} ...\]\]
+#   which maps into the simple two dimensional array
+#        coordnums1         coordnums2         ...
+#   1  atomids_list1,1   atomids_list2,1       ...
+#   2  atomids_list1,2   atomids_list2,2	 ...
+#   3  atomids_list1,3   atomids_list2,3       ...
+#   ...   ...                 ...              ...
+#
+# SYNOPSIS:
+#   ::utiltools::measure::AtmXcoordNum <molID> <sel1> <sel2> <r> <start> <end> 
+#
+# OPTIONS
+# @param molID	 
+# @param sel1 : main selection from which neighbors/coordNums are computed
+# @param sel2 : selection of neighbor atoms
+# @param r : cutoff for searching neighbors
+# @param start, end : first and last considered frames. If if equals a simplified output is returned, see RETURN below
+# @return \[list (coordnums1 coordnums2 ) [list {atomids_list1} {atomids_list1} ...] (see description)
+#
+
 
 package provide utiltools 3.0
 
@@ -89,16 +121,12 @@ proc ::utiltools::measure::computeNeighAtms {molID id_list sel2 r frame coordNum
 		$tmp delete
 		continue
 	    } elseif {$coordNum} {
-#		lappend mainGrp $id
 		lappend neighb $nn
-		$tmp delete
 	    } else {
-		set tmp [atomselect $molID $sel_string frame $frame]
-#		lappend mainGrp $id
 		lappend neighb [$tmp get index]
-		$tmp delete
 	    }
-
+	    $tmp delete
+	    
 	}
 
 	return $neighb
@@ -154,6 +182,95 @@ proc ::utiltools::measure::NeighAtms {molID sel1 sel2 r start end {coordNum F} {
 	# only one frame (start==end)
 	set neighatm [::utiltools::measure::computeNeighAtms $molID $id_list1 $sel2 $r $start $coordNum $nopairs]
  	return [list $id_list1 $neighatm] 
+    }
+    
+
+}
+
+proc ::utiltools::measure::computeNeighAtmslists {molID id_list sel2 r frame} {
+
+    # output is \[list (coordnums1 coordnums2 ) [list {atomids_list1} {atomids_list1} ...]
+
+
+    set coordNumsList {}
+    
+    for {set i 0}  {$i < [llength $id_list]} {incr i} {
+	
+	# define selection
+	set id [lindex $id_list $i]
+	set sel_string "($sel2) and (within $r of index $id) and not (index $id)"
+	# get neigbours
+	set tmp [atomselect $molID $sel_string frame $frame]
+
+	# add to a list of ids
+	set nn [$tmp num]
+	lappend CNlist$nn [$tmp get index]
+	#list of coordnums 
+	lappend coordNumsList $nn 
+	$tmp delete
+    	
+    }
+
+    # 
+    set CNs [lsort -integer -unique $coordNumsList] 
+    foreach nn $CNs {
+	lappend CNall [set CNlist$nn]
+    }
+
+    return [list $CNs $CNall] 
+    
+}
+
+proc ::utiltools::measure::AtmXcoordNum {molID sel1 sel2 r start end} {
+    # sort atoms according to their coordination number
+    # For flexibility (array are not flexible in tcl),
+    # output is \[list (coordnums1 coordnums2 ) \[list \{atomids_list1\} \{atomids_list1\} ...\]\]
+    # which maps into the simple two dimensional array
+    #      coordnums1         coordnums2         ...
+    # 1  atomids_list1,1   atomids_list2,1       ...
+    # 2  atomids_list1,2   atomids_list2,2	 ...
+    # 3  atomids_list1,3   atomids_list2,3       ...
+    # ...   ...                 ...              ...
+    
+    
+    if {[llength $molID] == 0 ||
+	[llength $sel1] == 0 ||
+	[llength $sel2] == 0 ||
+	[llength $r] == 0 ||
+	[llength $start] == 0 ||
+	[llength $end] == 0 } {
+	::utiltools::measure::AtmXcoordNum
+	return
+    }
+    
+    # checking whether a trajectory is considered
+    if {$start != $end} {
+	puts "::utiltools::measure::AtmXcoordNum working with trajectory" 
+	set trajNeigh T
+    } else {
+	puts "::utiltools::measure::AtmXcoordNum working with single frame"
+	set trajNeigh F
+    }
+
+    # list of atom IDs
+    set atsel1 [atomselect $molID $sel1]
+    set id_list1 [$atsel1 get index]
+    $atsel1 delete
+    
+    # search for neighbors
+
+    if { $trajNeigh } {
+	# working with trj
+	array unset neighatm
+	array set neighatm {}
+	for {set frame $start} {$frame <= $end} {incr frame} {
+	    set neighatm($frame) [::utiltools::measure::computeNeighAtmslists $molID $id_list1 $sel2 $r $frame]
+	}		  
+	return [array get neighatm] 
+    } else {
+	# only one frame (start==end)
+	set neighatm [::utiltools::measure::computeNeighAtmslists $molID $id_list1 $sel2 $r $start]
+ 	return $neighatm 
     }
     
 
