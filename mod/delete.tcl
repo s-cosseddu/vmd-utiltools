@@ -44,18 +44,16 @@ output filename (optional) default delete.pdb
 "
 }
 
-proc ::utiltools::mod::delete {molID selection {outname {delete.pdb}}} {
+proc ::utiltools::mod::delete {molID selection {outname {}}} {
         # checking input
     if {![ llength $molID ] || ![ llength $selection ]} {
 	::utiltools::mod::usage_delete
     }
 
-    set extension [regsub . [file extension $outname] {} ]
-    puts "outname :: $outname
-extension :: $extension"
-    set writing [atomselect top "not ($selection)"]
-    # writing new file
-    $writing write$extension $outname
-    $writing delete
-    mol new ${outname}
+    if {[ llength $outname ] == 0 } {
+	set outname /tmp/delete.pdb
+    }
+
+    ::utiltools::files::writesel $outname "not ($selection)" 
+    
 }

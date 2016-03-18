@@ -35,7 +35,7 @@ proc ::utiltools::rmsd::utilrmsd { frame selection reference } {
 }
 
 
-proc ::utiltools::rmsd::rmsd-r {molID r dr {selection {protein and backbone}} {molIDreference {}} {plot {TRUE}}} { 
+proc ::utiltools::rmsd::rmsd-r {molID r dr selection {molIDreference {}} {plot {TRUE}}} { 
 
     set outname [regsub -all { } $selection "_" ]
     
