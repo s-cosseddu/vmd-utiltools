@@ -45,7 +45,7 @@
 #   ...   ...                 ...              ...
 #
 # SYNOPSIS:
-#   ::utiltools::measure::AtmXcoordNum <molID> <sel1> <sel2> <r> <start> <end> 
+#   ::utiltools::measure::AtmXcoordNum <molID> <sel1> <sel2> <r> <start> <end> \[<print (F)\]
 #
 # OPTIONS
 # @param molID	 
@@ -94,6 +94,36 @@ proc ::utiltools::measure::usage_NeighAtms {} {
              if coordNum==T -> \[list  (atomids) (coordnum) \]
 "
 }
+
+proc ::utiltools::measure::usage_AtmXcoordNum {} {
+puts " FUNCTION:
+   AtmXcoordNum -
+   Sort atoms according to the number of neighbor atoms belonging to a given atom selection and within a range r.
+   Implementation is independent from ::utiltools::measure::NeighAtms and therefore faster if
+   more detailed information are not required.
+ 
+   For flexibility (array are not flexible in tcl),
+   output is \[list (coordnums1 coordnums2 ) \[list \{atomids_list1\} \{atomids_list1\} ...\]\]
+   which maps into the simple two dimensional array
+        coordnums1         coordnums2         ...
+   1  atomids_list1,1   atomids_list2,1       ...
+   2  atomids_list1,2   atomids_list2,2	 ...
+   3  atomids_list1,3   atomids_list2,3       ...
+   ...   ...                 ...              ...
+
+ SYNOPSIS:
+   ::utiltools::measure::AtmXcoordNum <molID> <sel1> <sel2> <r> <start> <end> \[<print (F)\]
+
+ OPTIONS
+ - molID	 
+ - sel1 : main selection from which neighbors/coordNums are computed
+ - sel2 : selection of neighbor atoms
+ - r : cutoff for searching neighbors
+ - start, end : first and last considered frames. If if equals a simplified output is returned, see RETURN below
+ return \[list (coordnums1 coordnums2 ) [list {atomids_list1} {atomids_list1} ...] (see description)
+"
+}
+
 
 # Compute id of neighbor atms of coord atoms at certain frame,
 # defined to be called by ::utiltools::measure::NeighAtms and not directly 
@@ -204,7 +234,7 @@ proc ::utiltools::measure::computeNeighAtmslists {molID id_list sel2 r frame} {
 
 	# add to a list of ids
 	set nn [$tmp num]
-	lappend CNlist$nn [$tmp get index]
+	lappend CNlist$nn $id
 	#list of coordnums 
 	lappend coordNumsList $nn 
 	$tmp delete
@@ -221,7 +251,7 @@ proc ::utiltools::measure::computeNeighAtmslists {molID id_list sel2 r frame} {
     
 }
 
-proc ::utiltools::measure::AtmXcoordNum {molID sel1 sel2 r start end} {
+proc ::utiltools::measure::AtmXcoordNum {{molID {}} sel1 sel2 r start end} {
     # sort atoms according to their coordination number
     # For flexibility (array are not flexible in tcl),
     # output is \[list (coordnums1 coordnums2 ) \[list \{atomids_list1\} \{atomids_list1\} ...\]\]
@@ -232,14 +262,8 @@ proc ::utiltools::measure::AtmXcoordNum {molID sel1 sel2 r start end} {
     # 3  atomids_list1,3   atomids_list2,3       ...
     # ...   ...                 ...              ...
     
-    
-    if {[llength $molID] == 0 ||
-	[llength $sel1] == 0 ||
-	[llength $sel2] == 0 ||
-	[llength $r] == 0 ||
-	[llength $start] == 0 ||
-	[llength $end] == 0 } {
-	::utiltools::measure::AtmXcoordNum
+    if {[llength $molID] == 0 || [string match $molID "-h"] } {
+	::utiltools::measure::usage_AtmXcoordNum
 	return
     }
     
@@ -274,4 +298,50 @@ proc ::utiltools::measure::AtmXcoordNum {molID sel1 sel2 r start end} {
     }
     
 
+}
+
+proc ::utiltools::measure::printAtmXcoordTs {{arrname {}} outfile} {
+
+    package require struct
+
+    if {[llength $arrname] == 0 || [string match $arrname "-h"] } {
+	puts "print ts from from ::utiltools::measure::AtmXcoordNum 
+usage:  ::utiltools::measure::printAtmXcoordTs <ts array from AtmXcoordNum> <output filename>"
+	return
+    }
+    
+    upvar 1 $arrname cnarr
+
+    if { [catch {open $outfile w} outfid] } {
+	puts stderr "::utiltools::measure::AtmXcoordNum Could not open $outfile for writing"
+	return -code 1
+    }
+
+    set frames [array name cnarr]
+
+    # checking cn,
+    set CNs {}
+    puts "checking coordination numbers, may take long"
+    foreach f $frames {
+	set CNs [lsort -unique -integer [::struct::set union [lindex $cnarr($f) 0] $CNs]]
+    }
+
+    puts "writing ts"
+    puts $outfid "# $CNs"
+
+    foreach f $frames {
+	foreach c $CNs { 
+	    set cnpos [lsearch -integer -exact  [lindex $cnarr($f) 0] $c]
+	    if { $cnpos >= 0} {
+		puts -nonewline $outfid "[llength [lindex $cnarr($f) 1 $cnpos]]\t"
+	    } else {
+		puts -nonewline $outfid "0\t"
+	    }
+	}
+	puts $outfid ""
+    }
+    close $outfid
+
+    return
+    
 }
