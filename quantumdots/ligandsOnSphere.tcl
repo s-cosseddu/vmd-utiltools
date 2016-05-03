@@ -1,20 +1,20 @@
 package provide utiltools 3.0
 
 namespace eval utiltools {
-    namespace eval quantumdot {
+    namespace eval quantumdots {
 	# declaring namespace
 	namespace export ligandsOnSphere
     }
 }
 
 
-proc ::utiltools::quantumdot::ligandsOnSphere {nligs ligStructure center r Sel_lig_Main Sel_lig2 {cutoff {5}}} {
+proc ::utiltools::quantumdots::ligandsOnSphere {ligID nligs center r Sel_lig_Main Sel_lig2 {cutoff {5}}} {
 
     # Determine coordinates of ligands
-    set ligandCoords [::utiltools::quantumdot::ligandsLocate $nligs $center $r $cutoff]
+    set ligandCoords [::utiltools::random::randomSphere $nligs $center $r $cutoff]
     
     # creating new molecule with ligands
-    set ligID [mol new $ligStructure waitfor all]
+    # set ligID \[mol new $ligStructure waitfor all\]
     set ligMolID [::utiltools::mol::clone $ligID all $ligandCoords "C" $ligandCoords $Sel_lig_Main $Sel_lig2]
 
 }
