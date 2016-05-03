@@ -19,8 +19,10 @@ package ifneeded utiltools 3.0 "\
 [list source [file join $dir mod swapper.tcl]]; \
 [list source [file join $dir mol clone.tcl]]; \
 [list source [file join $dir mol common.tcl]]; \
+[list source [file join $dir random common.tcl]]; \
 [list source [file join $dir random randomMatrix.tcl]]; \
 [list source [file join $dir random randomSphere.tcl]]; \
+[list source [file join $dir random randomCube.tcl]]; \
 [list source [file join $dir rdf rdf.tcl]]; \
 [list source [file join $dir rmsd rmsd.tcl]]; \
 [list source [file join $dir quantumdots getAtmTypes.tcl]]; \

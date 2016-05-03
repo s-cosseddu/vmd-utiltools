@@ -35,11 +35,11 @@ proc ::utiltools::random::randomSphere {N center r {cutoff {0}} {maxIter {100}}}
     # remove overlapping positions
     if {$cutoff > 0} {
 	set removePoints T
-	puts "::utiltools::quantumdot::ligandsLocate remove overlaps (d < $cutoff)"
+	puts "::utiltools::random::randomSphere remove overlaps (d < $cutoff)"
     } elseif { $cutoff == 0} {
 	set removePoints F
     } else {
-	puts stderr "::utiltools::quantumdot::ligandsLocate cutoff must >= 0"
+	puts stderr "::utiltools::::random::randomSphere cutoff must >= 0"
     }
     
     expr srand([clock seconds]) 
