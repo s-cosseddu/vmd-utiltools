@@ -54,6 +54,6 @@ proc ::utiltools::mod::delete {molID selection {outname {}}} {
 	set outname /tmp/delete.pdb
     }
 
-    ::utiltools::files::writesel $outname "not ($selection)" 
-    
+    ::utiltools::files::writesel $molID $outname "not ($selection)" 
+    mol new ${outname}    
 }

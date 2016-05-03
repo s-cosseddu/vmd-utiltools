@@ -197,6 +197,7 @@ proc ::utiltools::measure::NeighAtms {molID sel1 sel2 r start end {coordNum F} {
     # list of atom IDs
     set atsel1 [atomselect $molID $sel1]
     set id_list1 [$atsel1 get index]
+    $atsel1 delete
     
     # search for neighbors
 

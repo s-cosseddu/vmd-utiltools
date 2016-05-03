@@ -20,16 +20,14 @@ namespace eval utiltools {
 }
 
 
-proc ::utiltools::files::writesel {outname selection} {
+proc ::utiltools::files::writesel {molID outname selection {beg {"now"}} {end {"now"}}} {
 
     set extension [regsub . [file extension $outname] {} ]
     puts "outname :: $outname
 extension :: $extension"
     
-    set writing [atomselect top "($selection)"]
+    set writing [atomselect $molID "($selection)"]
     # writing new file
-    $writing write$extension $outname
+    animate write $extension $outname beg $beg end $end sel $writing
     $writing delete
-    mol new ${outname}
-
 }
