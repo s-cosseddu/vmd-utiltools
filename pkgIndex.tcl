@@ -1,6 +1,7 @@
 # SMC 2013
 
 package ifneeded utiltools 3.0 "\
+[list source [file join $dir common grid.tcl]]; \
 [list source [file join $dir files array2ascii.tcl]]; \
 [list source [file join $dir files catpdb.tcl]]; \
 [list source [file join $dir files catpsf.tcl]]; \
@@ -15,6 +16,7 @@ package ifneeded utiltools 3.0 "\
 [list source [file join $dir mod moveCOMto.tcl]]; \
 [list source [file join $dir mod moveCloseTo.tcl]]; \
 [list source [file join $dir mod orient.tcl]]; \
+[list source [file join $dir mod solvate.tcl]]; \
 [list source [file join $dir mod superimposer.tcl]]; \
 [list source [file join $dir mod swapper.tcl]]; \
 [list source [file join $dir mol clone.tcl]]; \
