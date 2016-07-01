@@ -255,13 +255,17 @@ proc ::utiltools::measure::computeNeighAtmslists {molID id_list sel2 r frame} {
 proc ::utiltools::measure::AtmXcoordNum {{molID {}} sel1 sel2 r start end} {
     # sort atoms according to their coordination number
     # For flexibility (array are not flexible in tcl),
-    # output is \[list (coordnums1 coordnums2 ) \[list \{atomids_list1\} \{atomids_list1\} ...\]\]
+    # output is \[\[list (coordnums1 coordnums2 )\] \[list \{atomids_list1\} \{atomids_list1\} ...\]\]
     # which maps into the simple two dimensional array
     #      coordnums1         coordnums2         ...
     # 1  atomids_list1,1   atomids_list2,1       ...
     # 2  atomids_list1,2   atomids_list2,2	 ...
     # 3  atomids_list1,3   atomids_list2,3       ...
     # ...   ...                 ...              ...
+    # 
+    # array is used for trajectories (start != end):
+    # array($frame) == \[\[list (coordnums1 coordnums2 )\] \[list \{atomids_list1\} \{atomids_list1\} ...\]\]
+    # 
     
     if {[llength $molID] == 0 || [string match $molID "-h"] } {
 	::utiltools::measure::usage_AtmXcoordNum

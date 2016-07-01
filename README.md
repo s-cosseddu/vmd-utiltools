@@ -214,6 +214,9 @@ which maps into the simple two dimensional array
 	3  atomids\_list1,3   atomids\_list2,3     ...
 	...     ...                 ...            ...
 
+Array is used for trajectories (start != end):
+array($frame) <- '[[list (coordnums1 coordnums2 )] [list {atomids_list1} {atomids_list1} ...]]'
+ 
 **SYNOPSIS**
 
 	::utiltools::measure::AtmXcoordNum <molID> <sel1> <sel2> <r> <start> <end> 
@@ -228,7 +231,11 @@ which maps into the simple two dimensional array
  
 **RETURN**
 
+start == end:
 	[list (coordnums1 coordnums2 ) [list {atomids\_list1} {atomids\_list1} ...]
+
+Trajectories (start != end):
+	set array($frame) [[list (coordnums1 coordnums2 )] [list {atomids_list1} {atomids_list1} ...]]
 
 See description for more details.
 

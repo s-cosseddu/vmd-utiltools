@@ -13,7 +13,7 @@ namespace eval utiltools {
     }
 }
 
-proc ::utiltools::mod::solvate {molID boxsize solvent_file {outfile {"solvated.pdb"}} {cutoff {2.5}} {solv_box_side {"auto"}} {solv_segname {"SL"}}} {
+proc ::utiltools::mod::solvate {molID boxsize solvent_file {outfile {solvated.pdb}} {cutoff {2.5}} {solv_box_side {auto}} {solv_segname {SL}}} {
 
     package require topotools
 
@@ -22,18 +22,20 @@ proc ::utiltools::mod::solvate {molID boxsize solvent_file {outfile {"solvated.p
 
     # getting size of solvent box if not provided
     if {[string match $solv_box_side "auto"]} {
+	puts "Getting Solvent box size:"
 	if {[catch {lrange {*}[pbc get -molid $sbID] 0 2} solv_box_side]} {
 	    puts stderr "Solvent file does not contain box informations"
 	    return -code 1
 	}
-	puts $solv_box_side
+	puts "$solv_box_side"
     }
 
     if {[llength $boxsize] != 3 || [llength $solv_box_side] != 3 } {
-	puts stderr "boxsize and solv_box_side must be a vector of 3 elements"
+	puts stderr "boxsize ($boxsize) and solv_box_side ($solv_box_side) must be a vector of 3 elements"
+	mol delete $sbID
 	return -code 1
     }
-   
+
     # define origin of final solvent box
     set refSel [atomselect $molID all]
     set refCenter [measure center $refSel]
@@ -49,14 +51,17 @@ proc ::utiltools::mod::solvate {molID boxsize solvent_file {outfile {"solvated.p
     }
     #::utiltools::common::grid origin sizes spaces
     set coords [::utiltools::common::grid $origin $boxsize_int $solv_box_side]
-
-    # replicate solvent box on the grid, to the bigger solvent box 
+    
+    # replicate solvent box on the grid, to the bigger solvent box
+    puts "Cloning solvent box"
     set bigsbID [::utiltools::mol::clone $sbID all $coords $solv_segname]
 
+    puts "Merging solvent box and solvated molecule"
     set molSolID [::TopoTools::mergemols [list $molID $bigsbID]]
 
     # deleting overlapping
     #
+    puts "Deleting overlapping and finilizing"
     set Segname_list {}
     set SegN [::tcl::mathop::* {*}$boxsize_int]
     for {set i 0} {$i < $SegN} {incr i} {
@@ -64,11 +69,13 @@ proc ::utiltools::mod::solvate {molID boxsize solvent_file {outfile {"solvated.p
     }
 
 
+    # reanalyze new mol
     mol bondsrecalc $molSolID
-    topo guessangles
-    topo guessdihedrals
     mol reanalyze $molSolID
-
+    mol addrep $molSolID
+    #topo guessangles
+    #topo guessdihedrals
+    
     # replicated solv box
     lassign $minbox lx ly lz
     lassign $maxbox ux uy uz
@@ -77,10 +84,8 @@ proc ::utiltools::mod::solvate {molID boxsize solvent_file {outfile {"solvated.p
 
     set solvatedID [::utiltools::mod::delete $cutID "same residue as not (x <= $ux and y <= $uy and z <= $uz and x >= $lx and y >= $ly and z >= $lz)" $outfile]
 
-    
-#     and (x <= $ux and y <= $uy and z <= $uz and x >= $lx and y >= $ly and z >= $lz))
-    
-    $bigsbSel delete
+
+    # cleaning
     $refSel delete
     mol delete $sbID
     mol delete $bigsbID
@@ -98,7 +103,7 @@ proc ::utiltools::mod::solvate {molID boxsize solvent_file {outfile {"solvated.p
 # cd tmp
 
 # set molID [mol new "/Users/salvatore/tmp/delete.pdb"]
-# set boxsize {100 100 100}
+# set boxsize {100 100 120}
 # set solvent_file "/Volumes/Backup-2-VU/salvatore/lavoro/projects/quantumDots/Zeger/2-hexyldecanoic_acid/mk_structure/From_SPHERE_randomization/common/DCM3P_boxrel.pdb"
 # set outfile "solvated.pdb"
 # set solv_box_side "auto"

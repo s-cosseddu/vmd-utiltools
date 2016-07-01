@@ -19,7 +19,7 @@ namespace eval utiltools {
     }
 }
 
-proc usage_rotate {} { 
+proc ::utiltools::mod::usage_rotate {} { 
 		
 		puts "                                                                              
  ========================================================================================================\n\n\
@@ -42,7 +42,7 @@ proc usage_rotate {} {
 	    }
 
 
-proc rotate {molID selection args} {
+proc ::utiltools::mod::rotate {molID selection args} {
     # checking input
 
     if {[llength $molID] == 0 ||
@@ -69,22 +69,11 @@ proc rotate {molID selection args} {
     # selection all
     set all [atomselect top "all"]
 
-    puts "--------------------------------------------------------------------------------
-
-                        $filename moved of
-
-"
-
     # rotating
     foreach {axe value} $args { 
 	set transax [transaxis $axe $value]
 	$sel move $transax
-	puts "            $transax"
     }
-    
-
-    puts "
---------------------------------------------------------------------------------"
     
     $all delete
     $sel delete

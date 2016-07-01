@@ -16,7 +16,8 @@ package ifneeded utiltools 3.0 "\
 [list source [file join $dir mod moveCOMto.tcl]]; \
 [list source [file join $dir mod moveCloseTo.tcl]]; \
 [list source [file join $dir mod orient.tcl]]; \
-[list source [file join $dir mod solvate.tcl]]; \
+[list source [file join $dir mod orient.tcl]]; \
+[list source [file join $dir mod rotate.tcl]]; \
 [list source [file join $dir mod superimposer.tcl]]; \
 [list source [file join $dir mod swapper.tcl]]; \
 [list source [file join $dir mol clone.tcl]]; \
@@ -27,5 +28,6 @@ package ifneeded utiltools 3.0 "\
 [list source [file join $dir random randomCube.tcl]]; \
 [list source [file join $dir rdf rdf.tcl]]; \
 [list source [file join $dir rmsd rmsd.tcl]]; \
+[list source [file join $dir quantumdots coatQD.tcl]]; \
 [list source [file join $dir quantumdots getAtmTypes.tcl]]; \
 [list source [file join $dir quantumdots ligandsOnSphere.tcl]]"

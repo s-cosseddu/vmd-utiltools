@@ -6,10 +6,10 @@
 # Copyright of the owner for the original part
 
 # es.  											       
-# ::utiltools::orient molID orientSEL selCOM vector1 vector2
+# ::utiltools::orient atselCOM vector1 vector2 offset
 # OPTIONS                                                       				       
 # @param molID	 
-# @param selection, select what part of the system will be rotate      					       
+# @param atselCOM atom selection (made with atomselect) of the part of the system oriented      					       
 # @param x <angle> y <angle> z <angle>,   								       
 #   rotation is performed around axes and angles here selected, the angles are in degrees,         
 #   only one is needed									       
